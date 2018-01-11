@@ -1,6 +1,6 @@
 module Del3422016DataAnalysis
 
-  def parse_the_dir(f, operator, logger)
+  def check_data(f, operator, logger)
     logger.info "\nParsing csv files of '#{operator}' (#{f})"
     sheets_collection = Array.new(6, nil)
 
