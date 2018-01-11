@@ -27,6 +27,8 @@ require "del_342_2016_data_analysis/exceptions"
 require "del_342_2016_data_analysis/error_aggregator"
 require "del_342_2016_data_analysis/julia"
 require "del_342_2016_data_analysis/calculate"
+require "del_342_2016_data_analysis/dat_dirs"
+require "del_342_2016_data_analysis/reduce"
 
 module Del3422016DataAnalysis
   # Your code goes here...

@@ -9,8 +9,9 @@ require "del_342_2016_data_analysis"
 #   -i --interactive
 #   /path/to/data/folder
 
-# ruby bin/run.rb -y 2015 -o Acme,Eftza -s foo,bar -i boo/far
-# ruby bin/run.rb --folders ~/bau
+# ruby bin/run.rb -y 2013 -o Acme,Eftza -s calculate,reduce -i boo/far
+# ruby bin/run.rb -y 2013 -o ALL -s ALL -i boo/far
+# ruby bin/run.rb -y 2013 -o ALL -s ALL boo/far
 
 opts = Slop.parse do |o|
   o.integer '-y', '--year', 'starting year', required: true
@@ -20,10 +21,11 @@ opts = Slop.parse do |o|
   o.bool    '-x', '--exit', 'exit on error', default: false
 end
 
+# --- year
+year = opts[:year]
 
 # --- steps
 steps = Steps.new(opts[:steps])
-
 
 # --- path
 base_path = opts.arguments.shift
@@ -34,9 +36,7 @@ xlsx_to_ignore = Del3422016DataAnalysis::IgnoreFile.read(base_path)
 # ruby bin/run.rb -y 2015 -o ALL /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
 
 interactive = opts.interactive?
-# operators = opts[:operators].sort
 operators = Operators.new(opts[:operators], xlsx_to_ignore)
-# operators = :all if operators==["ALL"]
 interactive = false if !operators.all?
 excel_path = Del3422016DataAnalysis::Folders.excel_path(base_path)
 if operators.all?
@@ -47,25 +47,17 @@ else
 end
 
 
-# puts operators.inspect
-# #<Del3422016DataAnalysis::Operators:0x007fe537220ac8
-#    @suffix=".xlsx",
-#    @all=true,
-#    @included=["duferco", "green_network", "green_network_luce_gas"],
-#    @ignored=["acme"]>
-
 raise "The folder you passed is not existing" if !Dir.exists?(base_path)
 
-
-# logger
-logger = HybridLogger.new(File.join(Del3422016DataAnalysis::Folders.excel_path(base_path), "check_sums.log"), skip_datetime: true)
-logger.info "\n\n\nStart a new run!"
+# --- logger
+logger = HybridLogger.new(File.join(Del3422016DataAnalysis::Folders.log_path(base_path), "logger.log"), skip_datetime: true)
+logger.info "\n\nStart a new run!"
 
 
 
 steps.each do |step|
   case step
-  # ruby bin/run.rb -y 2015 -o ALL -s convert -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
+  # ruby bin/run.rb -y 2013 -o ALL -s convert -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
   when "convert"
     logger.info "\nConvert xlsx to csv..."
     intrv = interactive
@@ -74,15 +66,15 @@ steps.each do |step|
     excel_files.each do |excel_file|
       op = excel_file[:operator]
       proceed = true
-      proceed, intrv = ask_for(op) if intrv
+      proceed, intrv = ask_for(op, "convert xlsx to csv") if intrv
       if proceed
         logger.info "  converting #{op}..."
         dest_path = File.join(Del3422016DataAnalysis::Folders.csv_path(base_path), op)
-        `xlsx2csv -a #{excel_file.gsub(' ', '\ ')} #{dest_path.gsub(' ', '\ ')}` # http://blog.bigbinary.com/2012/10/18/backtick-system-exec-in-ruby.html
+        `xlsx2csv -a #{excel_file[:path].gsub(' ', '\ ')} #{dest_path.gsub(' ', '\ ')}` # http://blog.bigbinary.com/2012/10/18/backtick-system-exec-in-ruby.html
       end
     end
 
-  # ruby bin/run.rb -y 2015 -o ALL -s check -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
+  # ruby bin/run.rb -y 2013 -o ALL -s check -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
   when "check"
     logger.info "\nCheck correctness of data..."
     intrv = interactive
@@ -91,14 +83,14 @@ steps.each do |step|
 
     csv_dirs.each do |dir|
       proceed = true
-      proceed, intrv = ask_for(dir[:operator]) if intrv
+      proceed, intrv = ask_for(dir[:operator], "check data integrity") if intrv
       if proceed
         check_data(dir[:path], dir[:operator], logger) # see data_check.rb
         logger.info "\n"
       end
     end
 
-  # ruby bin/run.rb -y 2015 -o ALL -s calculate -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
+  # ruby bin/run.rb -y 2013 -o ALL -s calculate -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
   when "calculate"
     logger.info "\nStarting calculation..."
     intrv = interactive
@@ -107,49 +99,22 @@ steps.each do |step|
 
     csv_dirs.each do |dir|
       proceed = true
-      proceed, intrv = ask_for(dir[:operator]) if intrv
+      proceed, intrv = ask_for(dir[:operator], "run calculations") if intrv
       if proceed
         calculate(dir, base_path, logger)
         logger.info "\n"
       end
     end
 
-
+    # ruby bin/run.rb -y 2013 -o ALL -s reduce -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
   when "reduce"
-    # do something
+    logger.info "\nStarting reduction..."
+    intrv = interactive
+    dat_dirs = DatDirs.new(base_path, operators)
+    logger.info "   found #{dat_dirs.size} operators\n\n"
+    reduce(dat_dirs, base_path, year, logger)
   end
 
 end
 
 logger.info "\n\n\Finished.\n"
-
-
-
-# opts = Slop.parse do |o|
-#   o.string '-h', '--host', 'a hostname'
-#   o.integer '--port', 'custom port', default: 80
-#   o.string '-l', '--login', required: true
-#   o.bool '-v', '--verbose', 'enable verbose mode'
-#   o.bool '-q', '--quiet', 'suppress output (quiet mode)'
-#   o.bool '-c', '--check-ssl-certificate', 'check SSL certificate for host'
-#   o.on '--version', 'print the version' do
-#     puts Slop::VERSION
-#     exit
-#   end
-# end
-
-# puts ARGV #=> -v --login alice --host 192.168.0.1 --check-ssl-certificate
-
-# opts[:host]                 #=> 192.168.0.1
-# opts[:login]                #=> alice
-# opts.verbose?               #=> true
-# opts.quiet?                 #=> false
-# opts.check_ssl_certificate? #=> true
-
-# puts opts.to_hash  #=> { host: "192.168.0.1", login: "alice", port: 80, verbose: true, quiet: false, check_ssl_certificate: true }
-# puts opts.arguments.inspect
-
-# base_path = opts.arguments.first
-
-
-# puts steps.inspect

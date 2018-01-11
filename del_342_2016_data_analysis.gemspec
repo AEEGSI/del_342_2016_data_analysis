@@ -32,4 +32,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
 
   spec.add_dependency "slop", "~> 4.6.1"
+  spec.add_dependency "axlsx", "~> 2.0.1"
 end

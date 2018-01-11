@@ -8,7 +8,7 @@ module Del3422016DataAnalysis
       FileUtils.mkdir_p csv_path(path)
       FileUtils.mkdir_p log_path(path)
       FileUtils.mkdir_p dat_path(path)
-      FileUtils.mkdir_p disp_path(path)
+      FileUtils.mkdir_p results_path(path)
 
       Del3422016DataAnalysis::IgnoreFile.touch(path)
     end
@@ -29,8 +29,8 @@ module Del3422016DataAnalysis
       File.join(path, "dat-files")
     end
 
-    def self.disp_path(path)
-      File.join(path, "disp-files")
+    def self.results_path(path)
+      File.join(path, "results")
     end
   end
 end

@@ -15,3 +15,5 @@ if path = opts.arguments.shift
 else
   puts "You have to pass a valid path"
 end
+
+# ruby bin/create_folders.rb /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
