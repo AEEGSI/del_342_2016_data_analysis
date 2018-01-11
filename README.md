@@ -1,11 +1,20 @@
 # Del. 342/2016 Data Analysis
 
 Scripts used to read and analyse data provided by 'utenti del dispacciamento'.
-Reference (here)[https://www.autorita.energia.it/it/docs/16/342-16.htm]
+Reference: https://www.autorita.energia.it/it/docs/16/342-16.htm
 
-**Required**: to read xslx files and convert them to csv format i use the Python library (xlsx2csv)[https://github.com/dilshod/xlsx2csv]. None of similar Ruby libraries that i tried are so quick.
+**Required**: to read xslx files and convert them to csv format i use the Python library (https://github.com/dilshod/xlsx2csv). None of similar Ruby libraries that i tried are so quick.
 So you need to install Python.
 The core calculations for the aims of resolution are executed using Julia algorithms but are not provided in this issue.
+
+
+works on xlsx files
+
+Steps:
+1. Create the folder structure. Run `ruby bin/create_folders.rb /some/path`.
+
+
+
 
 Steps:
 1. Set the `config.rb` file
