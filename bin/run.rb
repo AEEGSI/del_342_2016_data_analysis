@@ -47,24 +47,21 @@ else
 end
 
 
-puts operators.inspect
+# puts operators.inspect
 # #<Del3422016DataAnalysis::Operators:0x007fe537220ac8
 #    @suffix=".xlsx",
 #    @all=true,
 #    @included=["duferco", "green_network", "green_network_luce_gas"],
 #    @ignored=["acme"]>
 
-puts "----"
-
 raise "The folder you passed is not existing" if !Dir.exists?(base_path)
-
-puts opts.to_hash
-puts "----"
 
 
 # logger
 logger = HybridLogger.new(File.join(Del3422016DataAnalysis::Folders.excel_path(base_path), "check_sums.log"), skip_datetime: true)
 logger.info "\n\n\nStart a new run!"
+
+
 
 steps.each do |step|
   case step
@@ -96,15 +93,32 @@ steps.each do |step|
       proceed = true
       proceed, intrv = ask_for(dir[:operator]) if intrv
       if proceed
-        parse_the_dir(dir[:path], dir[:operator], logger) # see data_check.rb
+        check_data(dir[:path], dir[:operator], logger) # see data_check.rb
         logger.info "\n"
       end
     end
+
+  # ruby bin/run.rb -y 2015 -o ALL -s calculate -i /Users/iwan/dev/ruby/del_342_2016_data_analysis/data/2013-pdb
+  when "calculate"
+    logger.info "\nStarting calculation..."
+    intrv = interactive
+    csv_dirs = CsvDirs.new(base_path, operators)
+    logger.info "   found #{csv_dirs.size} operators\n\n"
+
+    csv_dirs.each do |dir|
+      proceed = true
+      proceed, intrv = ask_for(dir[:operator]) if intrv
+      if proceed
+        calculate(dir, base_path, logger)
+        logger.info "\n"
+      end
+    end
+
+
+  when "reduce"
+    # do something
   end
 
-  when ""
-
-  end
 end
 
 logger.info "\n\n\Finished.\n"
