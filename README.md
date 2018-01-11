@@ -8,18 +8,18 @@ So you need to install Python.
 The core calculations for the aims of resolution are executed using Julia algorithms but are not provided in this issue.
 
 
-works on xlsx files
+Works on xlsx files.
 
-Steps:
-1. Create the folder structure. Run `ruby bin/create_folders.rb /some/path`.
+**Preliminary steps**
 
+Run `ruby bin/create_folders.rb /some/path` in order to let script create the folders structure.
 
+Move your Excel files (`*.xlsx`) into `/some/path/input-files/excel` directory.
+Eventually insert filenames you don't want to be processed to the `/some/path/input-files/excel/ignore.txt` file.
 
+**Steps of elaboration**
 
-Steps:
-1. Set the `config.rb` file
-2. Ensure you have the correct folder hierarchy. Use `create_folder_structure.rb`
-3. Convert xlsx files to csv format using `convert_input_xlsx_to_csv.rb`
-4. Check the correctness of data using `check_correctness.rb`
-5. Convert data and run Julia functions using `read_csv_files.rb`
-6. Collect results and put them into an Excel file using `read_and_compact_disp_dat.rb`
+1. Convert. To improve the reading speed of `.xslx` files, they will be converted to `.csv` files (one for each sheet) using the Python `xlsx2csv` library.
+2. Check. The `.csv` files are read to check the correctness of values.
+3. Calculate. The `.csv` files are now read and prepared for Julia algorithms.
+4. Reduce. The results of the previous state are finally read and written in _n_ `.txt` (one for each operator) and one Excel file.
