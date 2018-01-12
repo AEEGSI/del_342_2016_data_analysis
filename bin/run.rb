@@ -14,11 +14,16 @@ require "del_342_2016_data_analysis"
 # ruby bin/run.rb -y 2013 -o ALL -s ALL boo/far
 
 opts = Slop.parse do |o|
-  o.integer '-y', '--year', 'starting year', required: true
-  o.array   '-o', '--operators', 'operator names', delimiter: ',', default: ["ALL"]
-  o.array   '-s', '--steps', 'step names', delimiter: ',', default: ["ALL"]
+  o.banner = "#{o.banner} /path/to/data/folder"
+  o.integer '-y', '--year', 'starting year (mandatory)', required: true
+  o.array   '-o', '--operators', 'operator names (default: ALL)', delimiter: ',', default: ["ALL"]
+  o.array   '-s', '--steps', 'step names (default: ALL)', delimiter: ',', default: ["ALL"]
   o.bool    '-i', '--interactive', 'enable interactive mode on selecting operators', default: false
-  o.bool    '-x', '--exit', 'exit on error', default: false
+  # o.bool    '-x', '--exit', 'exit on error', default: false
+  o.on '--help' do
+    puts o
+    exit
+  end
 end
 
 # --- year
